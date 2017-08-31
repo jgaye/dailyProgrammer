@@ -1,0 +1,104 @@
+    <html>
+      <head>
+
+      </head>
+      <body>
+
+        <ul id="log">
+        </ul>
+
+        <script>
+
+          function init(inputs){
+            inputs.forEach(function(input){
+              
+              startTime = Date.now();
+              console.info("Starting time:", startTime, "ms", "for input", input);
+
+              //The next lucky number is at most 2*(the initial input)-1
+              //And really only for small numbers
+              var initialRange = range(1, input*2-1, returnIfOdd);
+              luckyLoop(1, initialRange, input);
+
+            })
+          }
+
+          //To create a range of numbers with an optional filtering function
+          //make your function return the number you want to push in the range array
+          function range(a, b, filter){
+            var range = [];
+
+            for(i=a; i<=b; i++){
+              if (typeof filter === "function"){
+                range.push(filter(i));
+              } else {
+                range.push(i);
+              }
+            }
+
+            //being sure there is no non number
+            range = range.filter(n => n);
+
+            console.warn(range);
+
+            return range;
+          }
+
+          function returnIfOdd(number){
+            if (number%2 != 0){
+              return number;
+            }
+          }
+
+          //Perform one cycle of number elimination
+          // return the next index to use and the resulting list, as an array
+          function performLuckyCycle(luckyIndex, list){
+            if( list[luckyIndex] == 1){
+              var filteredList = list.filter(returnIfOdd)
+            } else {
+              var filteredList = list.filter(n => 
+                n<=list[luckyIndex] || 
+                (list.indexOf(n)+1)%list[luckyIndex] != 0);
+            }
+            console.warn(luckyIndex + " " + filteredList);
+
+            return [luckyIndex + 1, filteredList];
+          }
+
+          //The recursive method checking if the loop is finished
+          //or launching the next luckyCycle
+          function luckyLoop(nextIndex, accumulatorList, initialInput){
+            if (accumulatorList[nextIndex] >= initialInput){
+
+              if(accumulatorList[nextIndex] == initialInput){
+                var result = initialInput + " is a lucky number";
+              } else {
+                var result = accumulatorList[nextIndex-1] + " < " + initialInput + " < " + accumulatorList[nextIndex]; 
+              }
+
+              console.info(result);
+
+              var node = document.createElement("LI");
+              var textnode = document.createTextNode(result);
+              node.appendChild(textnode);
+              document.getElementById("log").appendChild(node);
+
+              var endTime = Date.now();
+              console.info("End time:", endTime, "ms", "for input", initialInput);
+              console.info("Total time:", endTime - startTime, "ms", "for input", initialInput);
+
+            } else {
+              var luckyCycleResults = performLuckyCycle(nextIndex, accumulatorList);
+              luckyLoop(luckyCycleResults[0], luckyCycleResults[1], initialInput);
+            }
+          }
+
+          // var inputs = [103, 225, 997, 5000000];
+          var inputs = [103, 225, 997];
+
+          document.addEventListener('DOMContentLoaded', init(inputs), false);
+          
+        </script>
+
+      </body>
+    </html>
